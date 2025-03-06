@@ -1,3 +1,10 @@
 # Token Swap Dapp
 
-Fin Contracts Part
+TokenA:
+0xeD28C1a5b53f7b4798b1e131980Ce48FFA423cA9
+
+TokenB:
+0xf41cb3994e3d306a5853180c87d08d889512d3e2
+
+LP:
+0x9f83f7837c5a27387d6ad35664cd2197f4c6ea89
