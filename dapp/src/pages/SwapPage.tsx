@@ -2,7 +2,7 @@ import CurrentLiquidity from "@/components/CurrentLiquidity";
 import { OutletContext } from "@/components/Layout";
 import SwapToken from "@/components/SwapToken";
 import useMetamask from "@/hooks/useMetamask";
-import { Box, Button, Flex, Input, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import { useOutletContext } from "react-router-dom";
 
 function SwapPage() {
@@ -28,7 +28,10 @@ function SwapPage() {
         signer={signer}
         liquidityPoolContract={liquidityPoolContract}
       />
-      <SwapToken />
+      <SwapToken
+        signer={signer}
+        liquidityPoolContract={liquidityPoolContract}
+      />
     </Flex>
   );
 }
