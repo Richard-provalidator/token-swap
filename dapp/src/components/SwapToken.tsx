@@ -1,18 +1,36 @@
 import { AiOutlineSwap } from "react-icons/ai";
 import { Button, Flex, Input } from "@chakra-ui/react";
 import { Field } from "@/components/ui/field";
-import { FormEvent, useEffect, useState } from "react";
+import {
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { ethers, JsonRpcSigner } from "ethers";
 import { Contract } from "ethers";
 import useInputPrice from "@/hooks/useInputPrice";
 
 interface SwapTokenProps {
   signer: JsonRpcSigner | null;
+  tokenAContract: Contract | null;
+  tokenBContract: Contract | null;
   liquidityPoolContract: Contract | null;
+  toggleCurrent: boolean;
+  setToggleCurrent: Dispatch<SetStateAction<boolean>>;
 }
 
-function SwapToken({ signer, liquidityPoolContract }: SwapTokenProps) {
+function SwapToken({
+  signer,
+  tokenAContract,
+  tokenBContract,
+  liquidityPoolContract,
+  toggleCurrent,
+  setToggleCurrent,
+}: SwapTokenProps) {
   const [isReverse, setIsReverse] = useState(true);
+  const [isApproved, setIsApproved] = useState(false);
   const [tokenA, setTokenA] = useState("0");
   const [tokenB, setTokenB] = useState("0");
 
@@ -30,6 +48,53 @@ function SwapToken({ signer, liquidityPoolContract }: SwapTokenProps) {
     setTokenA,
     isReverse
   );
+
+  const checkApproved = async () => {
+    if (
+      !signer ||
+      !tokenAContract ||
+      !tokenBContract ||
+      !liquidityPoolContract
+    ) {
+      return;
+    }
+
+    try {
+      if (isReverse) {
+        const allowanceA = await tokenAContract.allowance(
+          signer.address,
+          import.meta.env.VITE_LIQUIDITY_POOL_ADDRESS
+        );
+
+        if (Number(tokenA) > Number(ethers.formatEther(allowanceA))) {
+          const tx = await tokenAContract.approve(
+            import.meta.env.VITE_LIQUIDITY_POOL_ADDRESS,
+            ethers.parseUnits(tokenA, 18)
+          );
+
+          await tx.wait();
+        }
+      } else {
+        const allowanceB = await tokenBContract.allowance(
+          signer.address,
+          import.meta.env.VITE_LIQUIDITY_POOL_ADDRESS
+        );
+
+        if (Number(tokenB) > Number(ethers.formatEther(allowanceB))) {
+          const tx = await tokenBContract.approve(
+            import.meta.env.VITE_LIQUIDITY_POOL_ADDRESS,
+            ethers.parseUnits(tokenB, 18)
+          );
+
+          await tx.wait();
+        }
+      }
+
+      setIsApproved(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const tokenSwap = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,6 +130,9 @@ function SwapToken({ signer, liquidityPoolContract }: SwapTokenProps) {
 
         console.log(res);
       }
+
+      setIsApproved(false);
+      setToggleCurrent(!toggleCurrent);
     } catch (error) {
       console.error(error);
     }
@@ -108,14 +176,25 @@ function SwapToken({ signer, liquidityPoolContract }: SwapTokenProps) {
           >
             <AiOutlineSwap />
           </Button>
-          <Button
-            type="submit"
-            loadingText="로딩중"
-            colorPalette="green"
-            size="2xs"
-          >
-            토큰 스왑
-          </Button>
+          {isApproved ? (
+            <Button
+              type="submit"
+              loadingText="로딩중"
+              colorPalette="green"
+              size="2xs"
+            >
+              토큰 스왑
+            </Button>
+          ) : (
+            <Button
+              loadingText="로딩중"
+              colorPalette="green"
+              size="2xs"
+              onClick={checkApproved}
+            >
+              토큰 스왑 승인
+            </Button>
+          )}
         </Flex>
         <Field label="Token B">
           <Input

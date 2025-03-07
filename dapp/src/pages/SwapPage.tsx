@@ -6,8 +6,15 @@ import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import { useOutletContext } from "react-router-dom";
 
 function SwapPage() {
-  const { signer, setSigner, liquidityPoolContract } =
-    useOutletContext<OutletContext>();
+  const {
+    signer,
+    setSigner,
+    tokenAContract,
+    tokenBContract,
+    liquidityPoolContract,
+    toggleCurrent,
+    setToggleCurrent,
+  } = useOutletContext<OutletContext>();
 
   const { connectWallet } = useMetamask(setSigner);
 
@@ -27,10 +34,15 @@ function SwapPage() {
       <CurrentLiquidity
         signer={signer}
         liquidityPoolContract={liquidityPoolContract}
+        toggleCurrent={toggleCurrent}
       />
       <SwapToken
         signer={signer}
+        tokenAContract={tokenAContract}
+        tokenBContract={tokenBContract}
         liquidityPoolContract={liquidityPoolContract}
+        toggleCurrent={toggleCurrent}
+        setToggleCurrent={setToggleCurrent}
       />
     </Flex>
   );

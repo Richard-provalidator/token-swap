@@ -25,12 +25,12 @@ function Header({ signer, setSigner }: HeaderProps) {
 
         <MenuRoot>
           <MenuTrigger asChild>
-            <Button colorPalette="green" variant="ghost" size="sm">
+            <Button colorPalette="green" size="sm">
               Menu
             </Button>
           </MenuTrigger>
 
-          <MenuContent bgColor="green.50">
+          <MenuContent bgColor="green.500">
             <MenuButton value="💰 Swap Token" href="/" />
             <MenuButton value="🏛️ Liquidity Pool" href="/liquidity" />
             <MetaMaskButton signer={signer} setSigner={setSigner} />
