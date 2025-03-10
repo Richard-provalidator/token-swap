@@ -11,6 +11,7 @@ import {
 import { ethers, JsonRpcSigner } from "ethers";
 import { Contract } from "ethers";
 import useInputPrice from "@/hooks/useInputPrice";
+import SuccessDialog from "./SuccessDialog";
 
 interface SwapTokenProps {
   signer: JsonRpcSigner | null;
@@ -33,6 +34,8 @@ function SwapToken({
   const [isApproved, setIsApproved] = useState(false);
   const [tokenA, setTokenA] = useState("0");
   const [tokenB, setTokenB] = useState("0");
+  const [openApprove, setOpenApprove] = useState(false);
+  const [openSwap, setOpenSwap] = useState(false);
 
   const { getInputPrice: getInputPriceA } = useInputPrice(
     signer,
@@ -91,6 +94,8 @@ function SwapToken({
       }
 
       setIsApproved(true);
+
+      setOpenApprove(true);
     } catch (error) {
       console.error(error);
     }
@@ -133,6 +138,8 @@ function SwapToken({
 
       setIsApproved(false);
       setToggleCurrent(!toggleCurrent);
+
+      setOpenSwap(true);
     } catch (error) {
       console.error(error);
     }
@@ -151,61 +158,75 @@ function SwapToken({
   }, [tokenB]);
 
   return (
-    <form onSubmit={tokenSwap}>
-      <Flex
-        direction={isReverse ? "row" : "row-reverse"}
-        gap={4}
-        alignItems="center"
-        maxW={512}
-        mx="auto"
-      >
-        <Field label="Token A">
-          <Input
-            colorPalette="green"
-            value={tokenA}
-            onChange={(e) => setTokenA(e.target.value)}
-            disabled={!isReverse}
-          />
-        </Field>
-        <Flex direction="column" gap={2}>
-          <Button
-            variant="ghost"
-            colorPalette="green"
-            size="2xs"
-            onClick={() => setIsReverse(!isReverse)}
-          >
-            <AiOutlineSwap />
-          </Button>
-          {isApproved ? (
+    <>
+      <form onSubmit={tokenSwap}>
+        <Flex
+          direction={isReverse ? "row" : "row-reverse"}
+          gap={4}
+          alignItems="center"
+          maxW={512}
+          mx="auto"
+        >
+          <Field label="Token A">
+            <Input
+              colorPalette="green"
+              value={tokenA}
+              onChange={(e) => setTokenA(e.target.value)}
+              disabled={!isReverse}
+            />
+          </Field>
+          <Flex direction="column" gap={2}>
             <Button
-              type="submit"
-              loadingText="로딩중"
+              variant="ghost"
               colorPalette="green"
               size="2xs"
+              onClick={() => setIsReverse(!isReverse)}
             >
-              토큰 스왑
+              <AiOutlineSwap />
             </Button>
-          ) : (
-            <Button
-              loadingText="로딩중"
+            {isApproved ? (
+              <Button
+                type="submit"
+                loadingText="로딩중"
+                colorPalette="green"
+                size="2xs"
+              >
+                토큰 스왑
+              </Button>
+            ) : (
+              <Button
+                loadingText="로딩중"
+                colorPalette="green"
+                size="2xs"
+                onClick={checkApproved}
+              >
+                토큰 스왑 승인
+              </Button>
+            )}
+          </Flex>
+          <Field label="Token B">
+            <Input
               colorPalette="green"
-              size="2xs"
-              onClick={checkApproved}
-            >
-              토큰 스왑 승인
-            </Button>
-          )}
+              value={tokenB}
+              onChange={(e) => setTokenB(e.target.value)}
+              disabled={isReverse}
+            />
+          </Field>
         </Flex>
-        <Field label="Token B">
-          <Input
-            colorPalette="green"
-            value={tokenB}
-            onChange={(e) => setTokenB(e.target.value)}
-            disabled={isReverse}
-          />
-        </Field>
-      </Flex>
-    </form>
+      </form>
+      <SuccessDialog
+        open={openApprove}
+        setOpen={setOpenApprove}
+        title={`${tokenA}, ${tokenB} 스왑 승인`}
+        message={`${tokenA}, ${tokenB}만큼 스왑 승인되었습니다.`}
+      />
+      <SuccessDialog
+        open={openSwap}
+        setOpen={setOpenSwap}
+        title={`${tokenA}, ${tokenB} 스왑`}
+        message={`${tokenA}, ${tokenB}만큼 스왑되었습니다.`}
+      />
+    </>
   );
 }
 

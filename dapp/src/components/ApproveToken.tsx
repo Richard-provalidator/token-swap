@@ -1,8 +1,17 @@
-import { Button, Flex, Input, Text } from "@chakra-ui/react";
+import {
+  Button,
+  CloseButton,
+  Dialog,
+  Flex,
+  Input,
+  Portal,
+  Text,
+} from "@chakra-ui/react";
 import { Contract } from "ethers";
 import { JsonRpcSigner } from "ethers";
 import { ethers } from "ethers";
 import { FormEvent, useState } from "react";
+import SuccessDialog from "./SuccessDialog";
 
 interface ApproveTokenProps {
   tokenName: string;
@@ -16,6 +25,7 @@ function ApproveToken({ tokenName, signer, tokenContract }: ApproveTokenProps) {
   const [approveAmount, setApproveAmount] = useState("0");
   const [allowanceLoading, setAllowanceLoading] = useState(false);
   const [approveLoading, setApproveLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const allowanceToken = async () => {
     if (!signer || !tokenContract) return;
@@ -50,7 +60,7 @@ function ApproveToken({ tokenName, signer, tokenContract }: ApproveTokenProps) {
       );
 
       await tx.wait();
-
+      setOpen(true);
       await allowanceToken();
     } catch (error) {
       console.error(error);
@@ -92,6 +102,12 @@ function ApproveToken({ tokenName, signer, tokenContract }: ApproveTokenProps) {
           </Button>
         </Flex>
       </form>
+      <SuccessDialog
+        open={open}
+        setOpen={setOpen}
+        title={`${tokenName} 승인`}
+        message={`${tokenName}: ${approveAmount}만큼 승인되었습니다.`}
+      />
     </>
   );
 }
